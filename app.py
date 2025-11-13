@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 # Load model and preprocessors
-model = joblib.load('churn_model.pkl')
+model = joblib.load('model.pkl')
 scaler = joblib.load('scaler.pkl')
 label_encoders = joblib.load('label_encoders.pkl')
 numerical_cols = joblib.load('numerical_cols.pkl')

@@ -37,7 +37,7 @@ This system predicts whether a customer will leave (churn) based on:
 ├── eda.py                    # Exploratory data analysis
 ├── templates/
 │   └── index.html           # Web interface
-├── churn_model.pkl          # Trained model
+├── model.pkl          # Trained model
 ├── scaler.pkl               # Feature scaler
 ├── label_encoders.pkl       # Categorical encoders
 └── requirements.txt         # Dependencies
