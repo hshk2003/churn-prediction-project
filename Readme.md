@@ -5,7 +5,7 @@
 A complete end-to-end machine learning project that predicts customer churn for telecom companies using real-world data.
 
 ## 🌟 Live Demo
-[🔗 Try the app here](your-app-url-will-go-here)
+[https://customer-churn-predictor-m27y.onrender.com/]
 
 ## 📊 Project Overview
 This system predicts whether a customer will leave (churn) based on:
@@ -29,19 +29,7 @@ This system predicts whether a customer will leave (churn) based on:
 - **Deployment**: Render
 - **Language**: Python 3.10
 
-## 📁 Project Structure
-```
-├── app.py                    # Flask web application
-├── train_model.py            # Model training pipeline
-├── preprocessing.py          # Data preprocessing
-├── eda.py                    # Exploratory data analysis
-├── templates/
-│   └── index.html           # Web interface
-├── model.pkl          # Trained model
-├── scaler.pkl               # Feature scaler
-├── label_encoders.pkl       # Categorical encoders
-└── requirements.txt         # Dependencies
-```
+
 
 ## 🚀 Local Setup
 
@@ -105,8 +93,8 @@ MIT License
 
 ## 👤 Author
 **Your Name**
-- GitHub: [@yourusername](https://github.com/hshk2003)
-- LinkedIn: [Your LinkedIn](www.linkedin.com/in/shaikh-huzaifa-b8a143334)
+- GitHub: (https://github.com/hshk2003)
+- LinkedIn: (www.linkedin.com/in/shaikh-huzaifa-b8a143334)
 
 ## 🙏 Acknowledgments
 - Dataset: IBM Telco Customer Churn
