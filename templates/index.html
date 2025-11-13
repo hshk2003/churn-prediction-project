@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Prediction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .churn {
+            background: #fee;
+            border-left: 4px solid #f44336;
+        }
+        
+        .no-churn {
+            background: #efe;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .probability {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Customer Churn Predictor</h1>
+        <p class="subtitle">Enter customer details to predict churn risk</p>
+        
+        <form id="predictionForm">
+            <div class="row">
+                <div class="form-group">
+                    <label for="tenure">Tenure (months):</label>
+                    <input type="number" id="tenure" name="tenure" required min="0" max="72">
+                </div>
+                
+                <div class="form-group">
+                    <label for="MonthlyCharges">Monthly Charges ($):</label>
+                    <input type="number" id="MonthlyCharges" name="MonthlyCharges" required min="0" step="0.01">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="TotalCharges">Total Charges ($):</label>
+                <input type="number" id="TotalCharges" name="TotalCharges" required min="0" step="0.01">
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label for="Contract">Contract Type:</label>
+                    <select id="Contract" name="Contract" required>
+                        <option value="">Select...</option>
+                        <option value="Month-to-month">Month-to-month</option>
+                        <option value="One year">One year</option>
+                        <option value="Two year">Two year</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="InternetService">Internet Service:</label>
+                    <select id="InternetService" name="InternetService" required>
+                        <option value="">Select...</option>
+                        <option value="DSL">DSL</option>
+                        <option value="Fiber optic">Fiber optic</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label for="OnlineSecurity">Online Security:</label>
+                    <select id="OnlineSecurity" name="OnlineSecurity" required>
+                        <option value="">Select...</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="No internet service">No internet service</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="TechSupport">Tech Support:</label>
+                    <select id="TechSupport" name="TechSupport" required>
+                        <option value="">Select...</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="No internet service">No internet service</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label for="PaymentMethod">Payment Method:</label>
+                    <select id="PaymentMethod" name="PaymentMethod" required>
+                        <option value="">Select...</option>
+                        <option value="Electronic check">Electronic check</option>
+                        <option value="Mailed check">Mailed check</option>
+                        <option value="Bank transfer">Bank transfer</option>
+                        <option value="Credit card">Credit card</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="PaperlessBilling">Paperless Billing:</label>
+                    <select id="PaperlessBilling" name="PaperlessBilling" required>
+                        <option value="">Select...</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit">Predict Churn Risk</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                
+                if (data.prediction === 'Will Churn') {
+                    resultDiv.className = 'churn';
+                    resultDiv.innerHTML = `
+                        <div class="result-title">⚠️ High Churn Risk</div>
+                        <div class="probability">Churn Probability: <strong>${data.churn_probability.toFixed(2)}%</strong></div>
+                        <div class="probability">Retention Probability: <strong>${data.retention_probability.toFixed(2)}%</strong></div>
+                        <p style="margin-top: 10px;">This customer is at risk of churning. Consider retention strategies!</p>
+                    `;
+                } else {
+                    resultDiv.className = 'no-churn';
+                    resultDiv.innerHTML = `
+                        <div class="result-title">✅ Low Churn Risk</div>
+                        <div class="probability">Churn Probability: <strong>${data.churn_probability.toFixed(2)}%</strong></div>
+                        <div class="probability">Retention Probability: <strong>${data.retention_probability.toFixed(2)}%</strong></div>
+                        <p style="margin-top: 10px;">This customer is likely to stay. Keep up the good service!</p>
+                    `;
+                }
+            } catch (error) {
+                alert('Error making prediction: ' + error);
+            }
+        });
+    </script>
+</body>
+</html>
