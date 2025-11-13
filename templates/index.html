@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 700px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -38,6 +38,7 @@
             text-align: center;
             color: #666;
             margin-bottom: 30px;
+            font-size: 0.95em;
         }
         
         .form-group {
@@ -49,6 +50,14 @@
             margin-bottom: 5px;
             color: #333;
             font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+            margin-left: 5px;
         }
         
         input, select {
@@ -82,10 +91,17 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
+            margin-top: 10px;
         }
         
         button:hover {
             transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
         
         #result {
@@ -93,6 +109,18 @@
             padding: 20px;
             border-radius: 10px;
             display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .churn {
@@ -115,34 +143,37 @@
             font-size: 18px;
             margin: 5px 0;
         }
+        
+        .feature-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎯 Customer Churn Predictor</h1>
-        <p class="subtitle">Enter customer details to predict churn risk</p>
         
         <form id="predictionForm">
+            
             <div class="row">
                 <div class="form-group">
-                    <label for="tenure">Tenure (months):</label>
-                    <input type="number" id="tenure" name="tenure" required min="0" max="72">
+                    <label for="tenure">
+                        Tenure <span class="feature-badge">HIGH IMPACT</span>
+                        <span class="help-text">How many months with company?</span>
+                    </label>
+                    <input type="number" id="tenure" name="tenure" required min="0" max="72" value="12" placeholder="e.g., 12">
                 </div>
                 
                 <div class="form-group">
-                    <label for="MonthlyCharges">Monthly Charges ($):</label>
-                    <input type="number" id="MonthlyCharges" name="MonthlyCharges" required min="0" step="0.01">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="TotalCharges">Total Charges ($):</label>
-                <input type="number" id="TotalCharges" name="TotalCharges" required min="0" step="0.01">
-            </div>
-            
-            <div class="row">
-                <div class="form-group">
-                    <label for="Contract">Contract Type:</label>
+                    <label for="Contract">
+                        Contract Type <span class="feature-badge">HIGH IMPACT</span>
+                    </label>
                     <select id="Contract" name="Contract" required>
                         <option value="">Select...</option>
                         <option value="Month-to-month">Month-to-month</option>
@@ -150,31 +181,56 @@
                         <option value="Two year">Two year</option>
                     </select>
                 </div>
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label for="MonthlyCharges">
+                        Monthly Charges <span class="feature-badge">HIGH IMPACT</span>
+                        <span class="help-text">$ per month</span>
+                    </label>
+                    <input type="number" id="MonthlyCharges" name="MonthlyCharges" required min="0" step="0.01" value="70" placeholder="e.g., 70.00">
+                </div>
                 
                 <div class="form-group">
-                    <label for="InternetService">Internet Service:</label>
+                    <label for="TotalCharges">
+                        Total Charges
+                        <span class="help-text">$ lifetime total</span>
+                    </label>
+                    <input type="number" id="TotalCharges" name="TotalCharges" required min="0" step="0.01" value="840" placeholder="e.g., 840.00">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label for="InternetService">
+                        Internet Service <span class="feature-badge">HIGH IMPACT</span>
+                    </label>
                     <select id="InternetService" name="InternetService" required>
                         <option value="">Select...</option>
                         <option value="DSL">DSL</option>
                         <option value="Fiber optic">Fiber optic</option>
-                        <option value="No">No</option>
+                        <option value="No">No internet</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="PaymentMethod">
+                        Payment Method <span class="feature-badge">HIGH IMPACT</span>
+                    </label>
+                    <select id="PaymentMethod" name="PaymentMethod" required>
+                        <option value="">Select...</option>
+                        <option value="Electronic check">Electronic check</option>
+                        <option value="Mailed check">Mailed check</option>
+                        <option value="Bank transfer (automatic)">Bank transfer</option>
+                        <option value="Credit card (automatic)">Credit card</option>
                     </select>
                 </div>
             </div>
             
             <div class="row">
                 <div class="form-group">
-                    <label for="OnlineSecurity">Online Security:</label>
-                    <select id="OnlineSecurity" name="OnlineSecurity" required>
-                        <option value="">Select...</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                        <option value="No internet service">No internet service</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="TechSupport">Tech Support:</label>
+                    <label for="TechSupport">Tech Support</label>
                     <select id="TechSupport" name="TechSupport" required>
                         <option value="">Select...</option>
                         <option value="Yes">Yes</option>
@@ -182,39 +238,43 @@
                         <option value="No internet service">No internet service</option>
                     </select>
                 </div>
-            </div>
-            
-            <div class="row">
-                <div class="form-group">
-                    <label for="PaymentMethod">Payment Method:</label>
-                    <select id="PaymentMethod" name="PaymentMethod" required>
-                        <option value="">Select...</option>
-                        <option value="Electronic check">Electronic check</option>
-                        <option value="Mailed check">Mailed check</option>
-                        <option value="Bank transfer">Bank transfer</option>
-                        <option value="Credit card">Credit card</option>
-                    </select>
-                </div>
                 
                 <div class="form-group">
-                    <label for="PaperlessBilling">Paperless Billing:</label>
-                    <select id="PaperlessBilling" name="PaperlessBilling" required>
+                    <label for="OnlineSecurity">Online Security</label>
+                    <select id="OnlineSecurity" name="OnlineSecurity" required>
                         <option value="">Select...</option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
+                        <option value="No internet service">No internet service</option>
                     </select>
                 </div>
             </div>
             
-            <button type="submit">Predict Churn Risk</button>
+            <button type="submit">🔮 Predict Churn Risk</button>
         </form>
         
         <div id="result"></div>
     </div>
     
     <script>
+        // Auto-calculate TotalCharges based on tenure and monthly charges
+        document.getElementById('tenure').addEventListener('input', calculateTotal);
+        document.getElementById('MonthlyCharges').addEventListener('input', calculateTotal);
+        
+        function calculateTotal() {
+            const tenure = parseFloat(document.getElementById('tenure').value) || 0;
+            const monthly = parseFloat(document.getElementById('MonthlyCharges').value) || 0;
+            document.getElementById('TotalCharges').value = (tenure * monthly).toFixed(2);
+        }
+        
         document.getElementById('predictionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Show loading state
+            const button = this.querySelector('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ Predicting...';
+            button.disabled = true;
             
             const formData = new FormData(this);
             
@@ -226,28 +286,58 @@
                 
                 const data = await response.json();
                 
+                console.log('Response:', data);
+                
                 const resultDiv = document.getElementById('result');
                 resultDiv.style.display = 'block';
                 
-                if (data.prediction === 'Will Churn') {
-                    resultDiv.className = 'churn';
+                if (data.error) {
+                    resultDiv.className = '';
+                    resultDiv.style.background = '#fff3cd';
+                    resultDiv.style.borderLeft = '4px solid #ffc107';
                     resultDiv.innerHTML = `
-                        <div class="result-title">⚠️ High Churn Risk</div>
-                        <div class="probability">Churn Probability: <strong>${data.churn_probability.toFixed(2)}%</strong></div>
-                        <div class="probability">Retention Probability: <strong>${data.retention_probability.toFixed(2)}%</strong></div>
-                        <p style="margin-top: 10px;">This customer is at risk of churning. Consider retention strategies!</p>
+                        <div class="result-title">⚠️ Error</div>
+                        <p>${data.error}</p>
                     `;
-                } else {
-                    resultDiv.className = 'no-churn';
-                    resultDiv.innerHTML = `
-                        <div class="result-title">✅ Low Churn Risk</div>
-                        <div class="probability">Churn Probability: <strong>${data.churn_probability.toFixed(2)}%</strong></div>
-                        <div class="probability">Retention Probability: <strong>${data.retention_probability.toFixed(2)}%</strong></div>
-                        <p style="margin-top: 10px;">This customer is likely to stay. Keep up the good service!</p>
-                    `;
+                } else if (data.prediction && typeof data.churn_probability !== 'undefined') {
+                    if (data.prediction === 'Will Churn') {
+                        resultDiv.className = 'churn';
+                        resultDiv.innerHTML = `
+                            <div class="result-title">⚠️ High Churn Risk</div>
+                            <div class="probability">Churn Probability: <strong>${data.churn_probability.toFixed(1)}%</strong></div>
+                            <div class="probability">Retention Probability: <strong>${data.retention_probability.toFixed(1)}%</strong></div>
+                            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #fcc;">
+                                <strong>💡 Recommendations:</strong><br>
+                                • Offer contract upgrade incentive<br>
+                                • Provide retention discount<br>
+                                • Assign dedicated support rep
+                            </p>
+                        `;
+                    } else {
+                        resultDiv.className = 'no-churn';
+                        resultDiv.innerHTML = `
+                            <div class="result-title">✅ Low Churn Risk</div>
+                            <div class="probability">Churn Probability: <strong>${data.churn_probability.toFixed(1)}%</strong></div>
+                            <div class="probability">Retention Probability: <strong>${data.retention_probability.toFixed(1)}%</strong></div>
+                            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #cfc;">
+                                <strong>💡 Status:</strong> Customer is stable. Continue current service level.
+                            </p>
+                        `;
+                    }
                 }
             } catch (error) {
-                alert('Error making prediction: ' + error);
+                console.error('Error:', error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = '';
+                resultDiv.style.background = '#fff3cd';
+                resultDiv.innerHTML = `
+                    <div class="result-title">⚠️ Connection Error</div>
+                    <p>Could not connect to server. Please try again.</p>
+                `;
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
         });
     </script>

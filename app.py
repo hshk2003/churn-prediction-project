@@ -12,6 +12,21 @@ scaler = joblib.load('scaler.pkl')
 label_encoders = joblib.load('label_encoders.pkl')
 numerical_cols = joblib.load('numerical_cols.pkl')
 
+# Define the minimal feature set we're using
+REQUIRED_FEATURES = [
+    'tenure', 'Contract', 'MonthlyCharges', 'TotalCharges',
+    'InternetService', 'PaymentMethod', 'TechSupport', 'OnlineSecurity'
+]
+
+# Complete feature list that model expects (in order)
+ALL_FEATURES = [
+    'gender', 'SeniorCitizen', 'Partner', 'Dependents',
+    'tenure', 'PhoneService', 'MultipleLines', 'InternetService',
+    'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport',
+    'StreamingTV', 'StreamingMovies', 'Contract', 'PaperlessBilling',
+    'PaymentMethod', 'MonthlyCharges', 'TotalCharges'
+]
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -19,73 +34,110 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get data from form
-        data = request.form.to_dict()
+        # Get data from form (only 8 fields)
+        user_data = request.form.to_dict()
         
-        # Create DataFrame with all expected features
-        # This ensures correct column order matching training data
-        feature_order = [
-            'gender', 'SeniorCitizen', 'Partner', 'Dependents',
-            'tenure', 'PhoneService', 'MultipleLines', 'InternetService',
-            'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport',
-            'StreamingTV', 'StreamingMovies', 'Contract', 'PaperlessBilling',
-            'PaymentMethod', 'MonthlyCharges', 'TotalCharges'
-        ]
+        print("📥 Received data:", user_data)
         
-        # Fill in missing features with defaults if not in form
-        defaults = {
-            'gender': 'Male',
-            'SeniorCitizen': '0',
-            'Partner': 'No',
+        # Create full feature dictionary with smart defaults
+        full_data = {
+            # Demographics - safe defaults
+            'gender': 'Female',
+            'SeniorCitizen': 0,
+            'Partner': 'Yes',
             'Dependents': 'No',
+            
+            # From user input
+            'tenure': user_data.get('tenure', 12),
+            
+            # Phone services - safe defaults
             'PhoneService': 'Yes',
             'MultipleLines': 'No',
+            
+            # From user input
+            'InternetService': user_data.get('InternetService', 'Fiber optic'),
+            'OnlineSecurity': user_data.get('OnlineSecurity', 'No'),
+            
+            # Additional services - safe defaults
             'OnlineBackup': 'No',
             'DeviceProtection': 'No',
+            
+            # From user input
+            'TechSupport': user_data.get('TechSupport', 'No'),
+            
+            # Streaming - safe defaults
             'StreamingTV': 'No',
-            'StreamingMovies': 'No'
+            'StreamingMovies': 'No',
+            
+            # From user input
+            'Contract': user_data.get('Contract', 'Month-to-month'),
+            
+            # Billing - safe default
+            'PaperlessBilling': 'Yes',
+            
+            # From user input
+            'PaymentMethod': user_data.get('PaymentMethod', 'Electronic check'),
+            'MonthlyCharges': user_data.get('MonthlyCharges', 70),
+            'TotalCharges': user_data.get('TotalCharges', 840)
         }
         
-        for feature in feature_order:
-            if feature not in data:
-                data[feature] = defaults.get(feature, 'No')
+        # Create DataFrame with correct column order
+        input_df = pd.DataFrame([full_data], columns=ALL_FEATURES)
         
-        input_df = pd.DataFrame([data])
+        # Convert numerical columns
+        numerical_fields = ['tenure', 'MonthlyCharges', 'TotalCharges', 'SeniorCitizen']
+        for field in numerical_fields:
+            input_df[field] = pd.to_numeric(input_df[field], errors='coerce').fillna(0)
         
-        # Reorder columns to match training
-        input_df = input_df[feature_order]
-        
-        # Convert numerical fields
-        for field in numerical_cols:
-            input_df[field] = pd.to_numeric(input_df[field])
+        print("📊 DataFrame before encoding:\n", input_df)
         
         # Encode categorical variables
-        for col, encoder in label_encoders.items():
-            if col in input_df.columns:
-                input_df[col] = encoder.transform(input_df[col].astype(str))
+        for col in input_df.columns:
+            if col in label_encoders:
+                try:
+                    input_df[col] = label_encoders[col].transform(input_df[col].astype(str))
+                except Exception as e:
+                    print(f"⚠️ Warning encoding {col}: {e}")
+                    input_df[col] = 0
+        
+        print("🔢 DataFrame after encoding:\n", input_df)
         
         # Scale numerical features
         input_df[numerical_cols] = scaler.transform(input_df[numerical_cols])
         
+        print("⚖️ DataFrame after scaling:\n", input_df)
+        
         # Make prediction
-        prediction = model.predict(input_df)[0]
+        prediction = int(model.predict(input_df)[0])
         probability = model.predict_proba(input_df)[0]
+        
+        churn_prob = float(probability[1]) * 100
+        retention_prob = float(probability[0]) * 100
+        
+        print(f"✅ Prediction: {prediction}, Churn: {churn_prob:.2f}%")
         
         result = {
             'prediction': 'Will Churn' if prediction == 1 else 'Will Not Churn',
-            'churn_probability': float(probability[1] * 100),
-            'retention_probability': float(probability[0] * 100)
+            'churn_probability': round(churn_prob, 2),
+            'retention_probability': round(retention_prob, 2)
         }
         
-        return jsonify(result)
+        return jsonify(result), 200
     
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        import traceback
+        error_trace = traceback.format_exc()
+        print("❌ ERROR:", error_trace)
+        return jsonify({
+            'error': str(e),
+            'message': 'Prediction failed. Please check all fields.'
+        }), 400
 
 @app.route('/health')
 def health():
-    return jsonify({'status': 'healthy'}), 200
+    return jsonify({'status': 'healthy', 'model': 'loaded'}), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    print(f"🚀 Starting server on port {port}...")
     app.run(host='0.0.0.0', port=port, debug=False)
